@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Jurnal Ilmiah</title>
+    <!-- Tailwind CSS untuk Desain Modern -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- html2pdf.js untuk Mengubah HTML menjadi PDF -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        /* Styling khusus untuk format cetak cetak jurnal */
+        .journal-preview {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.5;
+        }
+        .journal-title {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+        }
+        .journal-author {
+            font-size: 11pt;
+            text-align: center;
+        }
+        .journal-abstract {
+            font-size: 10pt;
+            text-align: justify;
+            font-style: italic;
+        }
+        .journal-heading {
+            font-size: 11pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 12pt;
+            margin-bottom: 6pt;
+        }
+        .journal-body {
+            font-size: 11pt;
+            text-align: justify;
+            text-indent: 0.5in;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-8 px-4 font-sans">
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- KOLOM KIRI: FORM INPUT -->
+        <div class="bg-white p-6 rounded-xl shadow-md space-y-4">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Form Input Jurnal</h2>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Judul Jurnal</label>
+                    <input type="text" id="input-title" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan judul penelitian...">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Nama Penulis & Afiliasi</label>
+                    <input type="text" id="input-author" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Nama Penulis, Universitas Universitas">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Abstrak</label>
+                    <textarea id="input-abstract" rows="4" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Tulis abstrak di sini..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Kata Kunci (Keywords)</label>
+                    <input type="text" id="input-keywords" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: AI, Jurnal, Edukasi">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Pendahuluan</label>
+                    <textarea id="input-intro" rows="4" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Latar belakang dan tujuan..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Metode Penelitian</label>
+                    <textarea id="input-method" rows="4" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Desain penelitian, data, teknik analisis..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Hasil dan Pembahasan</label>
+                    <textarea id="input-results" rows="5" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Temuan penelitian dan analisis..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Kesimpulan</label>
+                    <textarea id="input-conclusion" rows="3" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Kesimpulan akhir..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Daftar Pustaka (Referensi)</label>
+                    <textarea id="input-references" rows="3" class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Contoh: Smith, J. (2026). Title..."></textarea>
+                </div>
+            </div>
+            
+            <button onclick="downloadPDF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md shadow transition duration-200 mt-4">
+                ⬇️ Unduh Jurnal (PDF)
+            </button>
+        </div>
+        
+        <!-- KOLOM KANAN: LIVE PREVIEW -->
+        <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-gray-800">Pratinjau Dokumen (Real-time)</h2>
+            
+            <!-- Area Kertas A4 Jurnal -->
+            <div class="bg-white p-12 rounded-xl shadow-md journal-preview overflow-y-auto max-h-[85vh]" id="journal-area">
+                <div class="journal-title uppercase mb-2" id="view-title">[Judul Jurnal Akan Muncul Di Sini]</div>
+                <div class="journal-author mb-6 text-gray-600 italic" id="view-author">[Nama Penulis & Afiliasi]</div>
+                
+                <div class="border-t border-b border-black py-4 my-4 px-6">
+                    <div class="text-center font-bold text-sm mb-2">ABSTRAK</div>
+                    <div class="journal-abstract" id="view-abstract">[Isi abstrak penelitian Anda akan muncul di bagian ini secara otomatis saat diketik...]</div>
+                    <div class="mt-3 text-sm font-bold">Kata Kunci: <span class="font-normal italic" id="view-keywords">[Kata kunci]</span></div>
+                </div>
+                
+                <div>
+                    <div class="journal-heading">I. PENDAHULUAN</div>
+                    <div class="journal-body" id="view-intro">[Isi pendahuluan penelitian...]</div>
+                </div>
+                
+                <div>
+                    <div class="journal-heading">II. METODE PENELITIAN</div>
+                    <div class="journal-body" id="view-method">[Isi penjelasan metode...]</div>
+                </div>
+                
+                <div>
+                    <div class="journal-heading">III. HASIL DAN PEMBAHASAN</div>
+                    <div class="journal-body" id="view-results">[Isi hasil temuan dan pembahasan...]</div>
+                </div>
+                
+                <div>
+                    <div class="journal-heading">IV. KESIMPULAN</div>
+                    <div class="journal-body" id="view-conclusion">[Isi kesimpulan...]</div>
+                </div>
+
+                <div>
+                    <div class="journal-heading">DAFTAR PUSTAKA</div>
+                    <div class="text-sm space-y-1 pl-4 -indent-4 whitespace-pre-line" id="view-references">[Daftar referensi...]</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT UNTUK LOGIKA APLIKASI -->
+    <script>
+        // Fungsi untuk sinkronisasi input ke preview secara real-time
+        function setupSync(inputId, viewId) {
+            const inputEl = document.getElementById(inputId);
+            const viewEl = document.getElementById(viewId);
+            
+            inputEl.addEventListener('input', () => {
+                if (inputEl.value.trim() === "") {
+                    viewEl.innerText = `[${inputEl.placeholder}]`;
+                } else {
+                    viewEl.innerText = inputEl.value;
+                }
+            });
+        }
+
+        // Jalankan sinkronisasi untuk semua elemen
+        setupSync('input-title', 'view-title');
+        setupSync('input-author', 'view-author');
+        setupSync('input-abstract', 'view-abstract');
+        setupSync('input-keywords', 'view-keywords');
+        setupSync('input-intro', 'view-intro');
+        setupSync('input-method', 'view-method');
+        setupSync('input-results', 'view-results');
+        setupSync('input-conclusion', 'view-conclusion');
+        setupSync('input-references', 'view-references');
+
+        // Fungsi untuk mengunduh area pratinjau menjadi PDF format standar A4
+        function downloadPDF() {
+            const element = document.getElementById('journal-area');
+            const title = document.getElementById('input-title').value || 'Jurnal_Ilmiah';
+            
+            // Konfigurasi konversi PDF
+            const opt = {
+                margin:       [0.75, 0.75, 0.75, 0.75], // Margin standar 0.75 inci (sekitar 2cm)
+                filename:     `${title.toLowerCase().replace(/ /g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Jalankan proses download
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
