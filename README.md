@@ -1,0 +1,2 @@
+# generator-jurnal
+jurnal murid
